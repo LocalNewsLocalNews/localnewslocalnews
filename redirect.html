@@ -6,67 +6,69 @@
     <title>Discord OAuth2 Redirect</title>
 </head>
 <body>
-    <h1>Discord OAuth2 Redirect</h1>
-    <p>Redirecting...</p>
-    <div id="result"></div>
-    
+    <h1>Processing Your Request...</h1>
+    <p>If you are not redirected, please wait a moment.</p>
+
     <script>
-        // Get the URL parameters
-            const urlParams = new URLSearchParams(window.location.search);
-            const code = /* get the authorization code from the URL after redirect */;
-
-
+        // Fetch the code from the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        
         if (code) {
-            fetchDiscordData(code);
-        }
+            // Prepare to exchange the code for an access token
+            const client_id = '1303610727122075689'; // Your client ID
+            const client_secret = 'Vr4aEa6aE27JMMlsFQ1Ma8bInVDStsCP'; // Your client secret
+            const redirect_uri = 'https://insane-boat.info/redirect.html'; // Your redirect URI
 
-        async function fetchDiscordData(code) {
-            const clientId = '1303610727122075689'; // Replace with your Discord client ID
-            const clientSecret = 'Vr4aEa6aE27JMMlsFQ1Ma8bInVDStsCP'; // Replace with your Discord client secret
-            const redirectUri = 'https://insane-boat.info/redirect.html'; // Replace with your redirect URI
+            // Prepare the request data
+            const requestData = new URLSearchParams({
+                client_id: client_id,
+                client_secret: client_secret,
+                code: code,
+                grant_type: 'authorization_code',
+                redirect_uri: redirect_uri,
+                scope: 'email' // Make sure email scope is requested
+            });
 
-            // Exchange the authorization code for an access token
-            const tokenResponse = await fetch('https://discord.com/api/oauth2/token', {
+            // Exchange the code for the access token
+            fetch('https://discord.com/api/oauth2/token', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Content-Type': 'application/x-www-form-urlencoded'
                 },
-                body: new URLSearchParams({
-                    client_id: '1303610727122075689',
-                    client_secret: 'Vr4aEa6aE27JMMlsFQ1Ma8bInVDStsCP',
-                    code: code,  // This is the code returned in the redirect URL
-                    grant_type: 'authorization_code',
-                    redirect_uri: 'https://insane-boat.info/redirect.html',  // This must match your registered redirect URI
-                    scope: 'email',
-                })
+                body: requestData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.access_token) {
+                    // Successfully received an access token, now fetch the email
+                    fetch('https://discord.com/api/users/@me', {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': 'Bearer ' + data.access_token
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(userData => {
+                        // Process the user data (email, etc.)
+                        alert('Your email: ' + userData.email); // You can use this email as needed
+                        console.log(userData); // For debugging, you can view the entire user data
+                    })
+                    .catch(error => {
+                        console.error('Error fetching user data:', error);
+                    });
+                } else {
+                    // Error in token exchange
+                    alert('Error: ' + data.error_description);
+                    console.error('Error exchanging code for token:', data);
+                }
+            })
+            .catch(error => {
+                console.error('Error during fetch request:', error);
             });
-            const tokenData = await tokenResponse.json();
-
-            if (tokenData.access_token) {
-                // Use the access token to get the user's email and other information
-                const userResponse = await fetch('https://discord.com/api/v10/users/@me', {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${tokenData.access_token}`
-                    }
-                });
-
-                const userData = await userResponse.json();
-
-                // Show the user data and provide a link to download it as a JSON file
-                const jsonBlob = new Blob([JSON.stringify(userData, null, 2)], { type: 'application/json' });
-                const jsonUrl = URL.createObjectURL(jsonBlob);
-
-                const resultDiv = document.getElementById('result');
-                resultDiv.innerHTML = `
-                    <h2>Your Discord Data</h2>
-                    <pre>${JSON.stringify(userData, null, 2)}</pre>
-                    <br>
-                    <a href="${jsonUrl}" download="discord_data.json">Download your JSON data</a>
-                `;
-            } else {
-                document.getElementById('result').innerText = 'Error fetching data from Discord';
-            }
+        } else {
+            // If the code isn't available, display an error
+            alert('Error: Authorization code not found.');
         }
     </script>
 </body>
