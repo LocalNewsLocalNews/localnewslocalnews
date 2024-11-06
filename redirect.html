@@ -30,42 +30,43 @@
                 scope: 'email' // Make sure email scope is requested
             });
 
-            // Exchange the code for the access token
-            fetch('https://discord.com/api/oauth2/token', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: requestData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.access_token) {
-                    // Successfully received an access token, now fetch the email
-                    fetch('https://discord.com/api/users/@me', {
-                        method: 'GET',
-                        headers: {
-                            'Authorization': 'Bearer ' + data.access_token
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(userData => {
-                        // Process the user data (email, etc.)
-                        alert('Your email: ' + userData.email); // You can use this email as needed
-                        console.log(userData); // For debugging, you can view the entire user data
-                    })
-                    .catch(error => {
-                        console.error('Error fetching user data:', error);
-                    });
-                } else {
-                    // Error in token exchange
-                    alert('Error: ' + data.error_description);
-                    console.error('Error exchanging code for token:', data);
-                }
-            })
-            .catch(error => {
-                console.error('Error during fetch request:', error);
-            });
+            // Exchange the code for the access token// Exchange the code for the access token
+fetch('https://discord.com/api/oauth2/token', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: requestData
+})
+.then(response => response.json())
+.then(data => {
+    console.log(data);  // Log the response from Discord for debugging
+    if (data.access_token) {
+        // Successfully received an access token, now fetch the email
+        fetch('https://discord.com/api/users/@me', {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Bearer ' + data.access_token
+            }
+        })
+        .then(response => response.json())
+        .then(userData => {
+            console.log(userData);  // Log the user data to check if email exists
+            alert('Your email: ' + userData.email); // Display the email
+        })
+        .catch(error => {
+            console.error('Error fetching user data:', error);
+        });
+    } else {
+        // Error in token exchange
+        alert('Error: ' + data.error_description);
+        console.error('Error exchanging code for token:', data);
+    }
+})
+.catch(error => {
+    console.error('Error during fetch request:', error);
+});
+
         } else {
             // If the code isn't available, display an error
             alert('Error: Authorization code not found.');
