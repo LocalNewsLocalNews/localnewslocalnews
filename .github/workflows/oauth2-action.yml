@@ -1,0 +1,64 @@
+name: OAuth2 Token Fetcher
+
+on:
+  push:
+    paths:
+      - 'callback/*.txt'  # File where the OAuth code will be stored
+
+jobs:
+  fetch-user-data:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        pip install requests
+
+    - name: Fetch access token
+      run: |
+        import requests
+        import json
+
+        # Read the authorization code from the file
+        with open('callback/auth_code.txt', 'r') as file:
+            code = file.read().strip()
+
+        # Exchange the code for an access token
+        data = {
+            'client_id': 'YOUR_CLIENT_ID',
+            'client_secret': 'YOUR_CLIENT_SECRET',
+            'grant_type': 'authorization_code',
+            'code': code,
+            'redirect_uri': 'https://USERNAME.github.io/your-repo/callback'
+        }
+
+        response = requests.post('https://discord.com/api/v10/oauth2/token', data=data)
+        token_data = response.json()
+        access_token = token_data.get('access_token')
+
+        # Fetch user info using the access token
+        user_response = requests.get(
+            'https://discord.com/api/v10/users/@me',
+            headers={'Authorization': f'Bearer {access_token}'}
+        )
+        user_data = user_response.json()
+
+        # Save the user data to a JSON file
+        with open('user_data.json', 'w') as json_file:
+            json.dump(user_data, json_file, indent=4)
+
+    - name: Commit user data
+      run: |
+        git config --global user.name "github-actions"
+        git config --global user.email "actions@github.com"
+        git add user_data.json
+        git commit -m "Add user data after OAuth2"
+        git push
