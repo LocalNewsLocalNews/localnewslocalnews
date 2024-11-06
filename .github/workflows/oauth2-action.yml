@@ -33,11 +33,11 @@ jobs:
 
         # Exchange the code for an access token
         data = {
-            'client_id': 'YOUR_CLIENT_ID',
-            'client_secret': 'YOUR_CLIENT_SECRET',
+            'client_id': '1303610727122075689',
+            'client_secret': 'zUnmLNT8KsSz1B44ZVUgmmqdToW27SED',
             'grant_type': 'authorization_code',
             'code': code,
-            'redirect_uri': 'https://USERNAME.github.io/your-repo/callback'
+            'redirect_uri': 'https://localnewslocalnews.github.io/your-repo/callback'
         }
 
         response = requests.post('https://discord.com/api/v10/oauth2/token', data=data)
