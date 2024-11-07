@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin: 50px; }
+        input { width: 60%; padding: 10px; margin: 10px 0; }
+        button { padding: 10px 20px; cursor: pointer; font-size: 16px; }
+        .result { margin-top: 20px; }
+        .short-link { color: blue; text-decoration: underline; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>URL Shortener</h1>
+    <input type="url" id="long-url" placeholder="Enter URL to shorten" />
+    <button onclick="generateShortLink()">Shorten URL</button>
+
+    <div class="result" id="result"></div>
+
+    <script>
+        // Function to generate a random short code
+        function generateShortCode() {
+            return Math.random().toString(36).substring(2, 8); // Random short code (6 chars)
+        }
+
+        // Function to handle URL shortening
+        function generateShortLink() {
+            const longUrl = document.getElementById('long-url').value;
+            if (!longUrl) {
+                alert("Please enter a URL!");
+                return;
+            }
+
+            // Generate a short code for the URL
+            const shortCode = generateShortCode();
+            const shortLink = `${window.location.origin}/short/${shortCode}`;
+
+            // Display the short link to the user
+            document.getElementById('result').innerHTML = `
+                Short URL: <a href="${shortLink}" class="short-link" target="_blank">${shortLink}</a><br />
+                Copy and share this link!
+            `;
+
+            // Temporarily store the long URL associated with the short code in the URL (query parameter)
+            // In a real-world solution, this would require a backend or a storage system to persist it.
+            window.history.pushState({ shortCode: shortCode, longUrl: longUrl }, '', shortLink);
+        }
+    </script>
+</body>
+</html>
