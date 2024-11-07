@@ -35,7 +35,7 @@
 
             // Generate a short code for the URL
             const shortCode = generateShortCode();
-            const shortLink = `${window.location.origin}/short/${shortCode}`;
+            const shortLink = `${window.location.origin}/shortlink-${shortCode}`;
 
             // Display the short link to the user
             document.getElementById('result').innerHTML = `
@@ -43,9 +43,15 @@
                 Copy and share this link!
             `;
 
-            // Temporarily store the long URL associated with the short code in the URL (query parameter)
-            // In a real-world solution, this would require a backend or a storage system to persist it.
-            window.history.pushState({ shortCode: shortCode, longUrl: longUrl }, '', shortLink);
+            // Call a backend function to create the file on GitHub
+            createShortLinkFile(shortCode, longUrl);
+        }
+
+        // Function to create the HTML file for the short link
+        function createShortLinkFile(shortCode, longUrl) {
+            // This will be a placeholder function for interacting with GitHub API
+            // You would need to send a request to a server that calls the GitHub API
+            alert("This would trigger file creation on GitHub.");
         }
     </script>
 </body>
